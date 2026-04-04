@@ -24,12 +24,12 @@ const authSlice = createSlice({
       state.loading = action.payload;
     },
     logout: (state) => {
-      // ❌ login page nahi hai, to user null mat karo
+      
       state.user = {
         id: "1",
         email: "demo@gmail.com"
       };
-      state.role = 'viewer'; // ya 'admin' bhi rakh sakti ho
+      state.role = 'viewer'; 
     },
   },
 });

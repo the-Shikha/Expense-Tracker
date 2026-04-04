@@ -3,7 +3,7 @@ let currentRole = 'viewer';
 
 export const authService = {
   async signUp(email, password, role = 'viewer') {
-    // mock signup
+    
     currentUser = {
       id: Date.now().toString(),
       email,
@@ -14,7 +14,7 @@ export const authService = {
   },
 
   async signIn(email, password) {
-    // mock login
+    
     currentUser = {
       id: Date.now().toString(),
       email,

@@ -6,23 +6,37 @@ export function Button({
   ...props
 }) {
   const baseStyles =
-    'font-medium rounded-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed';
+    'inline-flex items-center justify-center font-black uppercase tracking-[0.1em] rounded-2xl transition-all duration-300 active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-offset-2 dark:focus:ring-offset-black border';
 
   const variantStyles = {
+    
     primary:
-      'bg-blue-600 hover:bg-blue-700 text-white shadow-sm hover:shadow',
+      'bg-indigo-600 border-indigo-500 hover:bg-indigo-500 text-white shadow-lg shadow-indigo-500/20 hover:shadow-indigo-500/40 focus:ring-indigo-500',
+    
+   
     secondary:
-      'bg-gray-200 hover:bg-gray-300 text-gray-800',
+      'bg-white dark:bg-zinc-900 text-gray-900 dark:text-white border-gray-200 dark:border-white/10 hover:bg-gray-50 dark:hover:bg-zinc-800 shadow-sm focus:ring-indigo-500',
+    
+    
     danger:
-      'bg-red-600 hover:bg-red-700 text-white shadow-sm hover:shadow',
+      'bg-rose-500 border-rose-400 hover:bg-rose-600 text-white shadow-lg shadow-rose-500/20 hover:shadow-rose-500/40 focus:ring-rose-400',
+    
+    
     ghost:
-      'bg-transparent hover:bg-gray-100 text-gray-700',
+      'bg-transparent border-transparent hover:bg-gray-100 dark:hover:bg-white/5 text-gray-500 dark:text-zinc-400 hover:text-gray-950 dark:hover:text-white focus:ring-gray-300',
+    
+   
+    outline:
+      'bg-transparent border-2 border-indigo-600 text-indigo-600 hover:bg-indigo-600 hover:text-white focus:ring-indigo-500',
+   
+    stealth:
+      'bg-gray-950 dark:bg-white text-white dark:text-black border-transparent hover:opacity-90 shadow-xl shadow-black/10 dark:shadow-white/5'
   };
 
   const sizeStyles = {
-    sm: 'px-3 py-1.5 text-sm',
-    md: 'px-4 py-2 text-base',
-    lg: 'px-6 py-3 text-lg',
+    sm: 'px-4 py-2 text-[9px] tracking-[0.15em]',
+    md: 'px-6 py-3 text-[10px] tracking-[0.2em]',
+    lg: 'px-10 py-4 text-[12px] tracking-[0.25em]',
   };
 
   return (

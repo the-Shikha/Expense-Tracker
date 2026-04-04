@@ -38,7 +38,7 @@ export function AuthProvider({ children }) {
     try {
       await authService.signUp(email, password, role);
 
-      // mock user set (since no backend auth listener)
+      
       dispatch(setUser({ email }));
       dispatch(setRole(role));
     } finally {

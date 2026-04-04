@@ -1,5 +1,3 @@
-// Optional: reference structure (for understanding / mock usage)
-
 export const Database = {
   public: {
     Tables: {
@@ -9,7 +7,7 @@ export const Database = {
           user_id: '',
           title: '',
           amount: 0,
-          type: 'income', // or 'expense'
+          type: 'income', 
           category: '',
           date: '',
           created_at: '',
@@ -18,7 +16,7 @@ export const Database = {
       user_profiles: {
         Row: {
           id: '',
-          role: 'viewer', // or 'admin'
+          role: 'viewer', 
           created_at: '',
         },
       },

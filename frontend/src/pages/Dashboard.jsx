@@ -1,38 +1,44 @@
 import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { setRole } from '../store/authSlice';
-
-import {
-  setTransactions,
-  addTransaction,
-  updateTransaction,
-  deleteTransaction,
-  setLoading,
-  setError,
-} from '../store/transactionsSlice';
-
+import { setTransactions, setLoading, setError } from '../store/transactionsSlice';
 import { transactionService } from '../services/transactionService';
 
 import { BalanceChart } from '../components/dashboard/BalanceChart';
 import { CategoryChart } from '../components/dashboard/CategoryChart';
 import { Insights } from '../components/dashboard/Insights';
-
 import { TransactionFilters } from '../components/transactions/TransactionFilters';
 import { TransactionList } from '../components/transactions/TransactionList';
 import { TransactionForm } from '../components/transactions/TransactionForm';
+import { deleteTransaction as deleteAction } from '../store/transactionsSlice';
+import { LayoutDashboard, Receipt, PieChart, Settings, Menu, X } from 'lucide-react';
+import { NavItem } from './NavItem';
+import { StatCard } from "./StatCard"
+
+import userImg from '../assets/images/user.png';
+import adminImg from '../assets/images/admin.png';
 
 export function Dashboard() {
   const dispatch = useDispatch();
-
   const { user, role } = useSelector((state) => state.auth);
-  const { transactions, loading } = useSelector(
-    (state) => state.transactions
-  );
+  const { transactions } = useSelector((state) => state.transactions);
 
   const [isFormOpen, setIsFormOpen] = useState(false);
+  const [selectedDate, setSelectedDate] = useState('');
+  
+  const [darkMode, setDarkMode] = useState(true); 
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [editingTransaction, setEditingTransaction] = useState(null);
 
   const isAdmin = role === 'admin';
+
+  useEffect(() => {
+    if (darkMode) {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+  }, [darkMode]);
 
   useEffect(() => {
     loadTransactions();
@@ -44,228 +50,225 @@ export function Dashboard() {
       const data = await transactionService.fetchTransactions();
       dispatch(setTransactions(data));
     } catch (err) {
-      dispatch(setError(err?.message || 'Failed to load transactions'));
+      dispatch(setError(err?.message || 'Failed to load'));
     }
   };
 
-  const handleAddTransaction = async (formData) => {
-    const newTransaction = await transactionService.createTransaction(
-      formData,
-      user?.id || "1"
-    );
-    dispatch(addTransaction(newTransaction));
+  const filteredTransactions = selectedDate
+    ? transactions.filter(t => t.date === selectedDate)
+    : transactions;
+
+  const formatCurrency = (val) => new Intl.NumberFormat('en-IN', {
+    style: 'currency',
+    currency: 'INR',
+  }).format(val);
+
+  const handleEdit = (transaction) => {
+    setEditingTransaction(transaction);
+    setIsFormOpen(true);
   };
 
-  const handleUpdateTransaction = async (formData) => {
-    const updated = await transactionService.updateTransaction(
-      editingTransaction.id,
-      formData
-    );
-    dispatch(updateTransaction(updated));
+  const handleDelete = async (id) => {
+    if (window.confirm("Are you sure you want to delete this transaction?")) {
+      try {
+        await transactionService.deleteTransaction(id);
+        dispatch(deleteAction(id));
+      } catch (err) {
+        dispatch(setError(err.message || "Failed to delete"));
+      }
+    }
+  };
+
+  const handleCloseForm = () => {
+    setIsFormOpen(false);
     setEditingTransaction(null);
   };
 
-  const handleDeleteTransaction = async (id) => {
-    if (!window.confirm('Delete this transaction?')) return;
-    await transactionService.deleteTransaction(id);
-    dispatch(deleteTransaction(id));
-  };
+  const stats = filteredTransactions.reduce(
+    (acc, t) => {
+      const amount = Number(t.amount) || 0;
+      const type = t.type?.toLowerCase();
 
-  const handleRoleSwitch = () => {
-    const newRole = role === 'admin' ? 'viewer' : 'admin';
-    dispatch(setRole(newRole));
+      if (type === 'income') {
+        acc.income += amount;
+        acc.balance += amount;
+      } else if (type === 'expense') {
+        acc.expense += amount;
+        acc.balance -= amount;
+      }
+
+      return acc;
+    },
+    { income: 0, expense: 0, balance: 0 }
+  );
+
+  const handleFormSubmit = async (formData) => {
+    try {
+      if (editingTransaction) {
+        await transactionService.updateTransaction(editingTransaction.id, formData);
+      } else {
+        await transactionService.createTransaction(formData);
+      }
+      handleCloseForm();
+      loadTransactions();
+    } catch (err) {
+      dispatch(setError(err?.message || 'Failed to save transaction'));
+    }
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#f8fafc] via-[#eef2ff] to-[#f1f5f9] flex">
-
-      {/* SIDEBAR */}
-      <div className="w-20 bg-white/70 backdrop-blur-xl border-r border-gray-200 flex flex-col items-center py-6 space-y-6 shadow-sm">
-        <div className="w-10 h-10 bg-blue-600 text-white rounded-xl flex items-center justify-center shadow">
-          ₹
-        </div>
-
-        <div className="text-gray-500 hover:text-blue-600 cursor-pointer">🏠</div>
-        <div className="text-gray-500 hover:text-blue-600 cursor-pointer">📊</div>
-        <div className="text-gray-500 hover:text-blue-600 cursor-pointer">💳</div>
-        <div className="text-gray-500 hover:text-blue-600 cursor-pointer">⚙️</div>
-      </div>
-
-      {/* MAIN */}
-      <div className="flex-1 p-6">
-
-        {/* TOP BAR */}
-        <div className="flex justify-between items-center mb-6">
-
-          <h1 className="text-2xl font-semibold text-gray-800">
-            Welcome {role} !
-          </h1>
-
-          <div className="flex items-center space-x-4">
-
-            
-
-            <div className="px-3 py-1 bg-white rounded-xl border text-sm shadow-sm">
-              {role}
-            </div>
-
-            <button
-              onClick={handleRoleSwitch}
-              className="text-sm text-blue-600 hover:text-blue-700"
-            >
-              Switch
-            </button>
-
-            {isAdmin && (
-              <button
-                onClick={() => {
-                  setEditingTransaction(null);
-                  setIsFormOpen(true);
-                }}
-                className="bg-blue-600 text-white px-4 py-2 rounded-xl shadow hover:scale-105 transition"
-              >
-                + Add
-              </button>
-            )}
-
-          </div>
-        </div>
-
-        {/* SUMMARY CARDS */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-
-  {/* BALANCE */}
-  <div className="relative bg-white border border-gray-200 rounded-2xl p-5 shadow-sm hover:shadow-md transition">
+    <div className="flex min-h-screen bg-gray-50 dark:bg-gray-950 text-gray-900 dark:text-gray-100 transition-colors duration-300">
+      
     
-    {/* TOP */}
-    <div className="flex justify-between items-center mb-3">
-      <p className="text-sm text-gray-500">Total Balance</p>
-      <div className="w-8 h-8 flex items-center justify-center rounded-lg bg-blue-50 text-blue-600 text-sm">
-        ₹
-      </div>
-    </div>
-
-    {/* VALUE */}
-    <h2 className="text-2xl font-semibold text-gray-900">
-      ₹{transactions.reduce((acc, t) =>
-        t.type === 'income' ? acc + t.amount : acc - t.amount, 0)}
-    </h2>
-
-    {/* SUBTEXT */}
-    <p className="text-xs text-gray-400 mt-1">
-      Available balance
-    </p>
-
-  </div>
-
-  {/* INCOME */}
-  <div className="relative bg-white border border-gray-200 rounded-2xl p-5 shadow-sm hover:shadow-md transition">
-    
-    <div className="flex justify-between items-center mb-3">
-      <p className="text-sm text-gray-500">Income</p>
-      <div className="w-8 h-8 flex items-center justify-center rounded-lg bg-green-50 text-green-600 text-sm">
-        ↑
-      </div>
-    </div>
-
-    <h2 className="text-2xl font-semibold text-gray-900">
-      ₹{transactions
-        .filter(t => t.type === 'income')
-        .reduce((a, t) => a + t.amount, 0)}
-    </h2>
-
-    <p className="text-xs text-gray-400 mt-1">
-      Total earnings
-    </p>
-
-  </div>
-
-  {/* EXPENSES */}
-  <div className="relative bg-white border border-gray-200 rounded-2xl p-5 shadow-sm hover:shadow-md transition">
-    
-    <div className="flex justify-between items-center mb-3">
-      <p className="text-sm text-gray-500">Expenses</p>
-      <div className="w-8 h-8 flex items-center justify-center rounded-lg bg-red-50 text-red-600 text-sm">
-        ↓
-      </div>
-    </div>
-
-    <h2 className="text-2xl font-semibold text-gray-900">
-      ₹{transactions
-        .filter(t => t.type === 'expense')
-        .reduce((a, t) => a + t.amount, 0)}
-    </h2>
-
-    <p className="text-xs text-gray-400 mt-1">
-      Total spending
-    </p>
-
-  </div>
-
-</div>
-
-        {/* CHARTS */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
-
-          <div className="lg:col-span-2 bg-white rounded-2xl p-5 shadow-md">
-            <BalanceChart transactions={transactions} />
-          </div>
-
-          <div className="bg-white rounded-2xl p-5 shadow-md">
-            <CategoryChart transactions={transactions} />
-          </div>
-
-        </div>
-
-        {/* INSIGHTS */}
-        <div className="bg-white rounded-2xl p-5 shadow-md mb-6">
-          <Insights transactions={transactions} />
-        </div>
-
-        {/* TRANSACTIONS */}
-        <div className="bg-white rounded-2xl p-5 shadow-md">
-          <h2 className="text-lg font-semibold mb-4 text-gray-800">
-            Transactions
-          </h2>
-
-          <TransactionFilters />
-
-          <TransactionList
-            transactions={transactions}
-            onEdit={(t) => {
-              setEditingTransaction(t);
-              setIsFormOpen(true);
-            }}
-            onDelete={handleDeleteTransaction}
-            isAdmin={isAdmin}
-          />
-        </div>
-
-      </div>
-
-      {/* MODAL */}
-      {isAdmin && (
-        <TransactionForm
-          isOpen={isFormOpen}
-          onClose={() => setIsFormOpen(false)}
-          onSubmit={
-            editingTransaction
-              ? handleUpdateTransaction
-              : handleAddTransaction
-          }
-          transaction={editingTransaction}
+      {isSidebarOpen && (
+        <div 
+          className="fixed inset-0 bg-black/50 z-40 lg:hidden" 
+          onClick={() => setIsSidebarOpen(false)}
         />
       )}
 
-      {/* LOADER */}
-      {loading && (
-        <div className="fixed inset-0 bg-black/20 flex items-center justify-center">
-          <div className="bg-white p-6 rounded-xl shadow">
-            <div className="animate-spin h-10 w-10 border-b-2 border-blue-600 rounded-full"></div>
+      
+      <aside className={`
+        fixed inset-y-0 left-0 z-50 w-72 bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-800 
+        transform transition-transform duration-300 ease-in-out lg:relative lg:translate-x-0
+        ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}
+      `}>
+        <div className="p-6 flex flex-col h-full">
+          <div className="flex items-center justify-between mb-8">
+            <h1 className="text-xl font-bold tracking-tight">Expense<span className="text-indigo-600">Tracker</span></h1>
+            <button className="lg:hidden" onClick={() => setIsSidebarOpen(false)}>
+              <X size={24} />
+            </button>
+          </div>
+
+          <div className="mb-8 p-4 bg-gray-50 dark:bg-gray-800/50 rounded-2xl border border-gray-100 dark:border-gray-700">
+            <div className="flex items-center gap-3 mb-4">
+              <img
+                src={role === 'admin' ? adminImg : userImg}
+                alt="profile"
+                className="w-10 h-10 rounded-full object-cover border border-gray-200 dark:border-gray-700"
+              />
+              <div className="overflow-hidden">
+                <p className="text-sm font-bold truncate">{user?.email || "User Account"}</p>
+                <p className="text-xs text-indigo-600 dark:text-indigo-400 font-medium uppercase tracking-wider">{role}</p>
+              </div>
+            </div>
+            
+            <button
+              onClick={() => setDarkMode(!darkMode)}
+              className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-white dark:bg-gray-700 hover:shadow-md transition-all rounded-lg font-medium text-sm border border-gray-200 dark:border-gray-600"
+            >
+              {darkMode ? '☀️ Light Mode' : '🌙 Dark Mode'}
+            </button>
+          </div>
+
+          <nav className="space-y-2">
+            <NavItem label="Dashboard" icon={LayoutDashboard} active />
+            <NavItem label="Transactions" icon={Receipt} />
+            <NavItem label="Analytics" icon={PieChart} />
+            <NavItem label="Settings" icon={Settings} />
+          </nav>
+        </div>
+      </aside>
+
+      
+      <main className="flex-1 p-4 md:p-8 overflow-y-auto w-full">
+        
+        
+        <div className="lg:hidden flex items-center justify-between mb-6">
+          <button onClick={() => setIsSidebarOpen(true)} className="p-2 bg-white dark:bg-gray-900 rounded-lg shadow-sm">
+            <Menu size={24} />
+          </button>
+          <h1 className="text-lg font-bold tracking-tight">Expense<span className="text-indigo-600">Tracker</span></h1>
+          <div className="w-10" /> {/* Spacer */}
+        </div>
+
+       
+        <header className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
+          <div>
+            <h2 className="text-2xl font-bold">Financial Dashboard</h2>
+            <p className="text-gray-500 dark:text-gray-400 text-sm">Track your earnings and spendings easily.</p>
+          </div>
+
+          <div className="flex items-center gap-3 w-full md:w-auto">
+            <button
+              onClick={() => dispatch(setRole(role === 'admin' ? 'viewer' : 'admin'))}
+              className="flex-1 md:flex-none px-4 py-2 text-sm font-medium border border-gray-200 dark:border-gray-700 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+            >
+              Switch Role
+            </button>
+            {isAdmin && (
+              <button
+                onClick={() => setIsFormOpen(true)}
+                className="flex-1 md:flex-none px-5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-bold rounded-xl shadow-lg transition-all"
+              >
+                + Add Transaction
+              </button>
+            )}
+          </div>
+        </header>
+
+       
+        <section className="mb-12">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 mb-8">
+            <StatCard title="Net Liquidity" amount={stats.balance} type="balance" format={formatCurrency} />
+            <StatCard title="Inbound Revenue" amount={stats.income} type="income" format={formatCurrency} />
+            <StatCard title="Outbound Burn" amount={stats.expense} type="expense" format={formatCurrency} className="sm:col-span-2 md:col-span-1" />
+          </div>
+        </section>
+
+        
+        <div className="grid grid-cols-1 gap-6 mb-8">
+          <div className="bg-white dark:bg-gray-900 p-4 md:p-6 rounded-2xl border border-gray-200 dark:border-gray-800">
+            <h3 className="text-lg font-bold mb-4">Balance Trends</h3>
+            <BalanceChart transactions={filteredTransactions} />
           </div>
         </div>
-      )}
 
+       
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+          <div className="bg-white dark:bg-gray-900 p-4 md:p-6 rounded-2xl border border-gray-200 dark:border-gray-800">
+            <h3 className="text-lg font-bold mb-4 flex items-center gap-2">
+               <span className="w-2 h-2 rounded-full bg-emerald-500"></span> Income Breakdown
+            </h3>
+            <CategoryChart transactions={filteredTransactions.filter(t => t.type === 'income')} />
+          </div>
+          <div className="bg-white dark:bg-gray-900 p-4 md:p-6 rounded-2xl border border-gray-200 dark:border-gray-800">
+            <h3 className="text-lg font-bold mb-4 flex items-center gap-2">
+               <span className="w-2 h-2 rounded-full bg-rose-500"></span> Expense Breakdown
+            </h3>
+            <CategoryChart transactions={filteredTransactions.filter(t => t.type === 'expense')} />
+          </div>
+        </div>
+
+        <Insights transactions={filteredTransactions} />
+
+        
+        <div className="mt-8">
+          <div className="mb-6 space-y-3">
+            <h2 className="text-xl font-bold">Recent History</h2>
+            <TransactionFilters />
+          </div>
+
+          <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl overflow-x-auto shadow-sm">
+            <TransactionList 
+              transactions={filteredTransactions} 
+              isAdmin={isAdmin} 
+              onEdit={handleEdit}
+              onDelete={handleDelete}
+            />
+          </div>
+        </div>
+      </main>
+
+      {isAdmin && (
+        <TransactionForm
+          isOpen={isFormOpen}
+          onClose={handleCloseForm}
+          editingTransaction={editingTransaction}
+          onSubmit={handleFormSubmit} 
+        />
+      )}
     </div>
   );
 }
