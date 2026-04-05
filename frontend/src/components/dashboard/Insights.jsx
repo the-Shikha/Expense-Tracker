@@ -32,20 +32,34 @@ export function Insights({ transactions }) {
   const diff = lastMonthExp > 0 ? ((currentMonthExp - lastMonthExp) / lastMonthExp) * 100 : 0;
   const isRising = diff > 0;
 
+  // --- NEW: DYNAMIC INSIGHT LOGIC ---
+  const dynamicInsight = useMemo(() => {
+    if (!highestCategory) return "No data available to analyze your flow.";
+    
+    const [catName, catValue] = highestCategory;
+    const catPercentage = ((catValue / currentMonthExp) * 100).toFixed(0);
+
+    if (isRising && catPercentage > 40) {
+      return `Spending spike detected! ${catName} is consuming ${catPercentage}% of your budget. Consider a strategic cut here.`;
+    }
+    if (!isRising && diff < -10) {
+      return `Excellent flow! Your expenses dropped by ${Math.abs(diff).toFixed(0)}%. You're gaining significant financial ground.`;
+    }
+    return `Your ${catName} expenses are the primary driver this month. Flow is stable, but keep an eye on minor leaks.`;
+  }, [highestCategory, isRising, diff, currentMonthExp]);
+  // ----------------------------------
+
   return (
     <div className="mt-16 relative">
-      
       <div className="flex flex-col gap-2 mb-10 px-2">
-        
         <h3 className="text-3xl font-bold tracking-tighter text-gray-900 dark:text-white">
           Financial Insights
         </h3>
       </div>
 
-    
       <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
         
-        
+        {/* Card 1: Highest Burn */}
         <div className="group relative overflow-hidden bg-white dark:bg-[#0a0a0a] border border-gray-100 dark:border-white/5 p-8 rounded-[2.5rem] transition-all duration-500 hover:shadow-2xl hover:shadow-indigo-500/10 hover:-translate-y-2">
           <div className="flex justify-between items-start mb-6">
             <div className="p-3 bg-indigo-500/10 rounded-2xl text-indigo-500 group-hover:scale-110 transition-transform duration-500">
@@ -64,13 +78,12 @@ export function Insights({ transactions }) {
                {highestCategory ? Number(highestCategory[1]).toLocaleString('en-IN') : 0}
             </span>
           </div>
-         
           <div className="mt-6 w-full h-1 bg-gray-100 dark:bg-white/5 rounded-full overflow-hidden">
              <div className="h-full bg-indigo-500 rounded-full w-2/3 group-hover:w-full transition-all duration-1000" />
           </div>
         </div>
 
-        
+        {/* Card 2: Momentum */}
         <div className="group relative overflow-hidden bg-white dark:bg-[#0a0a0a] border border-gray-100 dark:border-white/5 p-8 rounded-[2.5rem] transition-all duration-500 hover:shadow-2xl hover:shadow-rose-500/10 hover:-translate-y-2">
           <div className="flex justify-between items-start mb-6">
             <div className={`p-3 rounded-2xl transition-all duration-500 group-hover:rotate-12 ${isRising ? 'bg-rose-500/10 text-rose-500' : 'bg-emerald-500/10 text-emerald-500'}`}>
@@ -93,24 +106,23 @@ export function Insights({ transactions }) {
           </p>
         </div>
 
-        
-        <div className="group relative overflow-hidden bg-white dark:bg-[#0a0a0a] border border-gray-100 dark:border-white/5 p-8 rounded-[2.5rem] transition-all duration-500 hover:shadow-2xl hover:shadow-rose-500/10 hover:-translate-y-2">
+        {/* Card 3: Dynamic Sparkle Insights */}
+        <div className="group relative overflow-hidden bg-white dark:bg-[#0a0a0a] border border-gray-100 dark:border-white/5 p-8 rounded-[2.5rem] transition-all duration-500 hover:shadow-2xl hover:shadow-indigo-500/10 hover:-translate-y-2">
           <div className="absolute top-0 right-0 p-8 opacity-10 group-hover:opacity-20 transition-opacity">
-            <Waves size={80} className="text-white dark:text-black" />
+            <Waves size={80} className="text-indigo-500" />
           </div>
 
           <div className="flex items-center gap-2 mb-8">
-            <Sparkles size={16} className="text-indigo-400" />
-            <span className="text-[9px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-[0.3em]">Insights</span>
+            <Sparkles size={16} className="text-indigo-400 animate-pulse" />
+            <span className="text-[9px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-[0.3em]">AI Engine</span>
           </div>
 
+          {/* Hoga dynamic text yahan */}
           <p className="text-lg font-bold text-gray-600 dark:text-white leading-tight tracking-tight relative z-10">
-            {isRising 
-              ? "High velocity detected in your spending. Strategic reduction recommended." 
-              : "Spending flow has reached an equilibrium point. Financial health is stable."}
+            {dynamicInsight}
           </p>
 
-          <button className="mt-8 flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-indigo-400 hover:text-black dark:hover:text-white transition-colors">
+          <button className="mt-8 flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-indigo-400 hover:text-indigo-600 dark:hover:text-white transition-colors relative z-10">
             Optimize Flow <Zap size={12} fill="currentColor" />
           </button>
         </div>

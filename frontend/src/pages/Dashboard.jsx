@@ -287,7 +287,7 @@ const handleFormSubmit = async (formData) => {
         
         <div className="mt-8">
           <div className="mb-6 space-y-3">
-            <h2 className="text-xl font-bold">Recent History</h2>
+            <h2 className="text-3xl font-bold">Recent History</h2>
             <TransactionFilters />
           </div>
 
