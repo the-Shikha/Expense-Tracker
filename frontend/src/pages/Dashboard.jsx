@@ -252,9 +252,9 @@ const handleFormSubmit = async (formData) => {
        
         <section className="mb-12">
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 mb-8">
-            <StatCard title="Net Liquidity" amount={stats.balance} type="balance" format={formatCurrency} />
-            <StatCard title="Inbound Revenue" amount={stats.income} type="income" format={formatCurrency} />
-            <StatCard title="Outbound Burn" amount={stats.expense} type="expense" format={formatCurrency} className="sm:col-span-2 md:col-span-1" />
+            <StatCard title="Net Balance" amount={stats.balance} type="balance" format={formatCurrency} />
+            <StatCard title="Revenue" amount={stats.income} type="income" format={formatCurrency} />
+            <StatCard title="Expenditure" amount={stats.expense} type="expense" format={formatCurrency} className="sm:col-span-2 md:col-span-1" />
           </div>
         </section>
 

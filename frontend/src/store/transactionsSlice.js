@@ -1,6 +1,5 @@
 import { createSlice } from '@reduxjs/toolkit';
 
-// 1. LocalStorage se transactions load karne ka logic
 const getSavedTransactions = () => {
   const saved = localStorage.getItem('userTransactions');
   return saved ? JSON.parse(saved) : [];
@@ -21,19 +20,15 @@ const transactionsSlice = createSlice({
   initialState,
   reducers: {
     setTransactions: (state, action) => {
-      // FIX: Dummy data aur Local data ko merge karein
       const apiData = action.payload || [];
       const localData = getSavedTransactions();
 
-      // Dono ko milayein aur duplicate IDs ko remove karein
       const combined = [...localData, ...apiData];
       
-      // Map ka use karke duplicate ID waale entries hatayein
       const uniqueData = Array.from(
         new Map(combined.map((item) => [item.id, item])).values()
       );
 
-      // Latest transactions ko top par rakhne ke liye sort (Optional)
       state.transactions = uniqueData.sort((a, b) => 
         new Date(b.date || 0) - new Date(a.date || 0)
       );
@@ -41,12 +36,10 @@ const transactionsSlice = createSlice({
       state.loading = false;
       state.error = null;
       
-      // Is merged data ko save karein taaki refresh par rahe
       saveToLocalStorage(state.transactions);
     },
 
     addTransaction: (state, action) => {
-      // Ensure karein naya data top par aaye
       state.transactions.unshift(action.payload);
       saveToLocalStorage(state.transactions);
     },
