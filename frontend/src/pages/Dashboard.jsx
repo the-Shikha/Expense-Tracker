@@ -26,7 +26,10 @@ export function Dashboard() {
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [selectedDate, setSelectedDate] = useState('');
   
-  const [darkMode, setDarkMode] = useState(true); 
+  const [darkMode, setDarkMode] = useState(() => {
+    const saved = localStorage.getItem('theme');
+    return saved ? saved === 'dark' : true; 
+  });
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [editingTransaction, setEditingTransaction] = useState(null);
 
@@ -35,8 +38,10 @@ export function Dashboard() {
   useEffect(() => {
     if (darkMode) {
       document.documentElement.classList.add('dark');
+      localStorage.setItem('theme', 'dark');
     } else {
       document.documentElement.classList.remove('dark');
+      localStorage.setItem('theme', 'light');
     }
   }, [darkMode]);
 
