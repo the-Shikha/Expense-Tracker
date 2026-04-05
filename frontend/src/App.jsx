@@ -1,18 +1,22 @@
 import { useSelector } from 'react-redux';
+import { useState, useEffect } from 'react';
 import { Dashboard } from './pages/Dashboard';
+import { SplashScreen } from './components/ui/SplashScreen'; 
 
 function App() {
-  const { loading } = useSelector((state) => state.auth);
+  const { loading: authLoading } = useSelector((state) => state.auth);
+  const [minimumTimeElapsed, setMinimumTimeElapsed] = useState(false);
 
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-blue-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Loading...</p>
-        </div>
-      </div>
-    );
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setMinimumTimeElapsed(true);
+    }, 2000);
+
+    return () => clearTimeout(timer);
+  }, []);
+
+  if (authLoading || !minimumTimeElapsed) {
+    return <SplashScreen />;
   }
 
   return <Dashboard />;

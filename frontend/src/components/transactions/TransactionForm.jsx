@@ -93,7 +93,7 @@ export function TransactionForm({
     >
       <div className="space-y-4 w-full max-w-full overflow-x-hidden">
        
-        <p className="text-xs sm:text-sm text-gray-500 dark:text-zinc-500 uppercase font-black tracking-widest">
+        <p className="text-xs sm:text-sm text-gray-500 dark:text-zinc-500 uppercase font-black ">
           Track your capital flow
         </p>
 

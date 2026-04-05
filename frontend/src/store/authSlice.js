@@ -1,11 +1,13 @@
 import { createSlice } from '@reduxjs/toolkit';
 
+const savedRole = localStorage.getItem('userRole') || 'admin'; 
+
 const initialState = {
   user: {
     id: "1",
     email: "demo@gmail.com"
   },
-  role: 'admin',
+  role: savedRole, 
   loading: false,
 };
 
@@ -19,17 +21,18 @@ const authSlice = createSlice({
     },
     setRole: (state, action) => {
       state.role = action.payload;
+      localStorage.setItem('userRole', action.payload);
     },
     setLoading: (state, action) => {
       state.loading = action.payload;
     },
     logout: (state) => {
-      
       state.user = {
         id: "1",
         email: "demo@gmail.com"
       };
       state.role = 'viewer'; 
+      localStorage.removeItem('userRole');
     },
   },
 });

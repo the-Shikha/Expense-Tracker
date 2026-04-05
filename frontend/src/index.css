@@ -1,3 +1,22 @@
 @import "tailwindcss";
 @variant dark (&:where(.dark, .dark *));
 .custom-scrollbar::-webkit-scrollbar { width: 0px; background: transparent; }
+
+
+@keyframes waterFill {
+  0% { width: 0%; }
+  100% { width: 100%; }
+}
+
+@keyframes waterFlow {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+.animate-water-fill {
+  animation: waterFill 2s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+.animate-water-flow {
+  animation: waterFlow 1s linear infinite;
+}
