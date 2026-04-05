@@ -44,73 +44,64 @@ export function BalanceChart({ transactions }) {
     
       <div className="h-[260px] md:h-[380px] w-full relative group/chart">
         <ResponsiveContainer width="100%" height="100%">
-          <AreaChart 
-            data={data} 
-            margin={{ top: 10, right: 10, left: -25, bottom: 0 }}
-            onMouseEnter={() => setIsHovered(true)}
-            onMouseLeave={() => setIsHovered(false)}
-          >
-            <defs>
-              <linearGradient id="balanceFill" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor="#6366f1" stopOpacity={0.15} />
-                <stop offset="95%" stopColor="#6366f1" stopOpacity={0.01} />
-              </linearGradient>
-              <filter id="lineGlow" x="-20%" y="-20%" width="140%" height="140%">
-                <feGaussianBlur stdDeviation="4" result="blur" />
-                <feComposite in="SourceGraphic" in2="blur" operator="over" />
-              </filter>
-            </defs>
+  <AreaChart 
+    data={data} 
+    // CHANGE 1: Left margin ko 0 ya positive rakhein taaki labels cut na ho
+    margin={{ top: 10, right: 10, left: 0, bottom: 20 }} 
+    onMouseEnter={() => setIsHovered(true)}
+    onMouseLeave={() => setIsHovered(false)}
+  >
+    <defs>
+      <linearGradient id="balanceFill" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="5%" stopColor="#6366f1" stopOpacity={0.2} />
+        <stop offset="95%" stopColor="#6366f1" stopOpacity={0} />
+      </linearGradient>
+    </defs>
 
-            <CartesianGrid 
-              strokeDasharray="4 4" 
-              stroke="currentColor" 
-              vertical={true}
-              horizontal={true}
-              className="text-gray-200 dark:text-gray-800/40" 
-              strokeOpacity={0.5}
-            />
+    <CartesianGrid 
+      strokeDasharray="3 3" 
+      vertical={false} 
+      stroke="currentColor" 
+      className="text-gray-200 dark:text-gray-800/60" 
+    />
 
-            <XAxis 
-              dataKey="date" 
-              axisLine={false}
-              tickLine={false}
-              tick={{ fill: '#94a3b8', fontSize: 10, fontWeight: 700 }}
-              dy={15}
-              padding={{ left: 10, right: 10 }}
-              interval="preserveStartEnd"
-            />
+    <XAxis 
+      dataKey="date" 
+      axisLine={false}
+      tickLine={false}
+      tick={{ fill: '#94a3b8', fontSize: 11 }}
+      dy={15} // Labels ko thoda niche shift kiya
+      interval="preserveStartEnd" 
+      minTickGap={40}
+    />
 
-            <YAxis 
-              axisLine={false}
-              tickLine={false}
-              tick={{ fill: '#94a3b8', fontSize: 9, fontWeight: 700 }}
-              tickFormatter={(val) => `₹${val >= 1000 ? (val / 1000).toFixed(0) + 'k' : val}`}
-              dx={-5}
-              width={40} 
-            />
+    <YAxis 
+      axisLine={false}
+      tickLine={false}
+      tick={{ fill: '#94a3b8', fontSize: 11 }}
+      // CHANGE 2: Width badha di taaki bada amount (₹100k) poora dikhe
+      width={60} 
+      tickFormatter={(val) => `₹${val >= 1000 ? (val / 1000).toFixed(0) + 'k' : val}`}
+      // CHANGE 3: Padding add ki taaki numbers chart line se na takrayein
+      tickMargin={10} 
+    />
 
-            <Tooltip 
-              content={<CustomTooltip />} 
-              cursor={{ stroke: '#6366f1', strokeWidth: 1.5, strokeDasharray: '4 4' }}
-            />
+    <Tooltip 
+      content={<CustomTooltip />} 
+      cursor={{ stroke: '#6366f1', strokeWidth: 2, strokeDasharray: '5 5' }}
+    />
 
-            <Area
-              type="monotone"
-              dataKey="balance"
-              stroke="#6366f1"
-              strokeWidth={3}
-              fill="url(#balanceFill)"
-              filter="url(#lineGlow)"
-              animationDuration={2000}
-              activeDot={{
-                r: 6,
-                fill: '#6366f1',
-                stroke: '#fff',
-                strokeWidth: 3,
-              }}
-            />
-          </AreaChart>
-        </ResponsiveContainer>
+    <Area
+      type="monotone"
+      dataKey="balance"
+      stroke="#6366f1"
+      strokeWidth={3}
+      fill="url(#balanceFill)"
+      animationDuration={1500}
+      activeDot={{ r: 6, fill: '#6366f1', stroke: '#fff', strokeWidth: 2 }}
+    />
+  </AreaChart>
+</ResponsiveContainer>
       </div>
     </div>
   );
