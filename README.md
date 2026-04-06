@@ -77,7 +77,46 @@ Built using **React, Redux, and Tailwind CSS**, the app focuses on:
 
 ---
 
+## 📌 Assignment Mapping (Zorvyn Requirements)
+
+This project fulfills all the requirements of the Finance Dashboard UI assignment:
+
+### 1. Dashboard Overview
+- Summary cards (Balance, Income, Expenses) implemented  
+- Time-based visualization using Area Chart  
+- Category-based visualization using Pie Chart  
+
+### 2. Transactions Section
+- Displays transactions with date, amount, category, and type  
+- Includes:
+  - Search  
+  - Filtering  
+  - Sorting  
+  - Pagination  
+
+### 3. Role-Based UI
+- Admin: Add/Edit/Delete transactions  
+- Viewer: Read-only access  
+- Role switching implemented on frontend  
+
+### 4. Insights Section
+- Highest spending category  
+- Monthly comparison  
+- Dynamic insights  
+
+### 5. State Management
+- Redux Toolkit for global state  
+- LocalStorage for persistence  
+
+### 6. UI/UX
+- Responsive design  
+- Dark mode  
+- Handles empty states  
+
+---
+
 ## 🧠 Approach
+The application is designed with a focus on simplicity, scalability, and user experience, aligning with the assignment requirements.
 
 ### 🔹 Component-Based Architecture
 The app is divided into reusable components:
