@@ -132,7 +132,7 @@ The app is divided into reusable components:
 
 ### 1️⃣ Clone the Repository
 ```bash
-git clone https://github.com/your-username/expense-tracker.git
+git clone https://github.com/the-Shikha/Expense-Tracker.git
 cd frontend
 ```
 
